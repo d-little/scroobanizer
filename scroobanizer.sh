@@ -9,6 +9,7 @@
 #	2014/11/12 - DL - 0.0.0 First Draft Started
 #	2014/11/18 - DL - 1.0.0 First Draft Complete
 #	2015/09/22 - DL - 1.0.1 Cleanup and additional checks
+#	2016/06/22 - DL - 1.0.2 Fixed up a bug when checking the free space of the iptrace output dir
 
 typeset -r VERSION="1.0.1"
 typeset -r UPDATED="2015/09/22"
@@ -251,7 +252,7 @@ if (( $(tput cols) < 112 )); then
 	exit 2
 fi
 
-if (( $(df -m /${OUTFILE}|awk '/^\// {print $3}') < 100 )); then
+if (( $(df -m $(dirname /${OUTFILE})|awk '/^\// {print $3}') < 100 )); then
 	# Free space is less than 100 in targeted system, this is not enough for very busy systems.
 	echo "There must be at least 100MB free space in the target filesystem."
 	exit 2
