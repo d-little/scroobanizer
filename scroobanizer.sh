@@ -304,8 +304,6 @@ typeset -i COUNTINCOMING=0
 typeset -i COUNTOUTGOING=0
 typeset -i DISCARD=0
 
-
-
 #========================================================================================================================
 # The report comes through looking something like this, without the # # obviously:
 #
@@ -337,8 +335,6 @@ typeset -i DISCARD=0
 #			printf $4" ";getline;
 #			printf
 #
-
-
 
 ipreport -N ${OUTFILE} | egrep '(< (SRC|DST) =|<source port)|ip_[a-b]+='|egrep -v "${MYIP}|127.0.0.1|::1"|awk '{printf $2" "$4;getline;printf " "$2" "$4"\n"}'|sed 's/,//g;s/(.*)//;s/port=//g'|while read -A LINE; do
 	SRCDST=${LINE[0]}
@@ -502,3 +498,4 @@ if [[ "${!BUSYIP[*]}" != "" ]]; then
 fi
 
 CLEANUP
+
