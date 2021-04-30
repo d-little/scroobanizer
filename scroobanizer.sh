@@ -327,7 +327,6 @@ MSG "Generating IP Report and gathering information"
 typeset -A ARRAY_INCOMINGTRAFFIC
 typeset -A ARRAY_OUTGOINGTRAFFIC
 typeset -A BUSYIP
-IPLIST=""
 typeset -i COUNTINCOMING=0
 typeset -i COUNTOUTGOING=0
 typeset -i DISCARD=0
