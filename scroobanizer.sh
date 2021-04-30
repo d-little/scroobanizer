@@ -5,7 +5,6 @@
 # Author:  David Little - david.n.little@gmail.com
 #  (C) 2015 by David Little The MIT License (MIT)
 #------------------------------------------------------------------------------------
-typeset -r VERSION="1.0.2"
 typeset -r LICENSE="The MIT License (MIT)"
 typeset -r SCRIPT="$(basename $0 .sh)"
 typeset -r AUTHOR="David Little"
