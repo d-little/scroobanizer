@@ -287,7 +287,9 @@ else
 	fi
 fi
 
-if (( $(df -m $(dirname /${TRACEFILE})|awk '/^\// {print $3}') < 100 )); then
+_tmp_dirname=$(dirname /"${TRACEFILE}")
+_tmp_df=$(df -m "${_tmp_dirname}"|awk '/^\// {print $3}')
+if (( _tmp_df < 100 )); then
 	# Free space is less than 100 in targeted system, this is not enough for
 	#  very busy systems.
 	MSG "There must be at least 100MB free space in the target filesystem."
