@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 typeset -r LICENSE="The MIT License (MIT)"
-typeset -r SCRIPT="$(basename $0 .sh)"
+typeset -r SCRIPT=$(basename "$0" .sh)
 typeset -r AUTHOR="David Little"
 #-------------------------------------------------------------------------------
 # Purpose:
@@ -31,7 +31,6 @@ typeset -r AUTHOR="David Little"
 
 
 #=Fancy Fonts===================================================================
-
 MAKE_FONT_ARRAYS()
 {
 	#===========================================================================
@@ -175,7 +174,7 @@ CLEANUP()
 	IPTRACESTATUS=$(lssrc -s iptrace|awk '/iptrace/{print $3}')
 	if [[ "${IPTRACESTATUS}" != inoperative ]]; then
 		MSG "Stopping IPTrace"
-		stopsrc -s iptrace|while read LINE; do
+		stopsrc -s iptrace|while read -r LINE; do
 			MSG "${LINE}"
 		done
 	fi
@@ -191,6 +190,7 @@ CLEANUP()
 }
 #-------------------------------------------------------------------------------
 
+#=MSG===========================================================================
 MSG() {
 	MESSAGE="$*"
 	if [[ "${MESSAGE}" == BOX_TOP ]]; then
@@ -228,11 +228,11 @@ MSG() {
 		echo "${MESSAGE}"
 	fi
 }
-
+#-------------------------------------------------------------------------------
 
 #=Globals=======================================================================
 typeset -i PAGEWIDTH="108"
-typeset -r SCRIPTNAME=$(basename $0)
+typeset -r SCRIPTNAME=$(basename "$0")
 typeset TRACEFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
 typeset MYIP=$(ifconfig -a|awk '/inet / {print $2;exit}')
 typeset -i SLEEP=10
@@ -244,9 +244,6 @@ typeset -i BUSYTHRESHOLD=20
 typeset -i BUSYONLY=0
 #-------------------------------------------------------------------------------
 
-
-
-
 #=Usage=========================================================================
 USAGE="[+NAME?${SCRIPTNAME} --- Show AIX LPAR Network Traffic Information]"
 USAGE+="[+DESCRIPTION? This script will show the network activity of an LPAR .]"
@@ -256,27 +253,33 @@ USAGE+="[-license?${LICENSE}]"
 
 USAGE+="[b:busy-only?Display only busy IP addresses. Disabled by default.]"
 USAGE+="[t:trace?Location to store tcpdump file]:[TRACEFILE:=${TRACEFILE}]"
-USAGE+="[o:output?Location to redirect the report itself.]:[OUTPUTFILE:=${OUTPUTFILE}]"
+USAGE+="[o:outputdir?Directory to redirect the report itself.]:[OUTPUTFILE:=${OUTPUTFILE}]"
 USAGE+="[s:sleep?Length in seconds to measure network traffic.]#[SLEEP:=${SLEEP}]"
 USAGE+=$'\n\n'
 while getopts "$USAGE" optchar ; do
     case $optchar in
 		b)  BUSYONLY=1 ;;
 		f)  TRACEFILE=$OPTARG ;;
-        o)  OUTPUTFILE=$OPTARG ;;
+        o)  OUTPUTDIR=$OPTARG ;;
 		s)  SLEEP=$OPTARG ;;
     esac
 done
 shift "$((OPTIND - 1))"
 #-------------------------------------------------------------------------------
 
-
 # At the start of this script is the function MAKE_FONT_ARRAYS, which will 
 #  handle fancy fonts and the like.
 MAKE_FONT_ARRAYS 
 
 #=Sanity========================================================================
-if [[ "${OUTPUTFILE}" == "" ]]; then
+if [[ "${OUTPUTDIR}" != "" ]]; then
+	if [[ ! -d "${OUTPUTDIR}" ]]; then
+		echo "Output directory doesnt exist. (${OUTPUTDIR})"
+        echo "See \`--man\` for more details."
+        exit 2
+	fi
+	OUTPUTFILE="${OUTPUTDIR}/scroobanizer_$(date +%Y%m%d-%H%M%S).out"
+else
 	if (( $(tput cols) < 112 )); then
 		# Column width needs to be at least 112
 		MSG "There must be at least 112 columns in your terminal (Currently: $(tput cols)"
@@ -306,7 +309,7 @@ MSG BOX_TOP
 ################################
 MSG "${SCRIPT}: v${VERSION}: By ${AUTHOR} on ${UPDATED} ${LICENSE}"
 MSG "Starting Trace, outputting to ${TRACEFILE}"
-startsrc -s iptrace -a "${TRACEFILE}"|while read LINE; do
+startsrc -s iptrace -a "${TRACEFILE}"|while read -r LINE; do
 	MSG "${LINE}"
 done
 MSG  "Sleeping for ${SLEEP} seconds"
@@ -516,4 +519,3 @@ if [[ "${!BUSYIP[*]}" != "" ]]; then
 fi
 
 CLEANUP
-
