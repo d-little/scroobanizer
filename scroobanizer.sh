@@ -1,39 +1,40 @@
 #!/usr/bin/ksh93
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
 # Script:  scroobanizer.sh
 # Created: 2014/11/12
 # Author:  David Little - david.n.little@gmail.com
 #  (C) 2015 by David Little The MIT License (MIT)
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
 typeset -r LICENSE="The MIT License (MIT)"
 typeset -r SCRIPT="$(basename $0 .sh)"
 typeset -r AUTHOR="David Little"
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Purpose:
 #  Display information about where packets are headed on your AIX LPAR
 #	
 # Use:
 # usage: # Details in <script> --man
-#   <script> [ options ]
-#     -f file, --file                  use custom file location, defaults /tmp/
-#     -b, --busy-only                  show only busy processes, defaults off
-#     -s time, --sleep time    		   length of time to sleep, defaults 10
 #
 # Comments:
-#	Pretty much everything in here is my own work. Feel free to steal any of the code or modify as you want.
+#	Pretty much everything in here is my own work. Feel free to steal any of the
+#    code or modify as you want.
 #   Usual disclaimers apply, use at your own risk.
 #   Please send all bug reports or requests to david.n.little@gmail.com
 #
 # Features to Add:
-#	Check MTU and make sure that packets size is accounted for when calculating traffic
+#	Check MTU and make sure that packets size is accounted for when calculating 
+#   traffic
 #	
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#=Fancy Fonts====================================================================================
+
+#=Fancy Fonts===================================================================
 
 MAKE_FONT_ARRAYS()
 {
-	#====================================================================================
+	#===========================================================================
 	typeset -A FONT=( 
 		[UNDERLINE]="\033[4m" 
 		[NORMAL]="\033[0m"
@@ -76,10 +77,9 @@ MAKE_FONT_ARRAYS()
 		[6]="${FONT[BLACK_F]}${FONT[WHITE_B]}" [7]="${FONT[WHITE_F]}${FONT[BLACK_B]}"
 	)
 	FONT_FB2_COUNT=8
-	#====================================================================================
+	#===========================================================================
 
-
-	#====================================================================================
+	#===========================================================================
 	# Set up the boxes!
 	typeset -A BOX
 	BOX["CLR"]=( # Lower right hand corner
@@ -158,9 +158,9 @@ MAKE_FONT_ARRAYS()
 		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0x\033(B\033[0m${FONT[NORMAL]}") #))
 	)
 }
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-#=Cleanup====================================================================================
+#=Cleanup=======================================================================
 # We set up traps to ensure that the trace is correctly stopped
 trap 'CLEANUP SIGINT;exit' SIGINT
 trap 'CLEANUP; exit' SIGQUIT
@@ -189,7 +189,7 @@ CLEANUP()
 	[[ "$1" == SIGINT ]] && exit 1
 	exit 0
 }
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 MSG() {
 	MESSAGE="$*"
@@ -230,22 +230,24 @@ MSG() {
 }
 
 
-#=Globals====================================================================================
+#=Globals=======================================================================
 typeset -i PAGEWIDTH="108"
 typeset -r SCRIPTNAME=$(basename $0)
 typeset TRACEFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
 typeset MYIP=$(ifconfig -a|awk '/inet / {print $2;exit}')
 typeset -i SLEEP=10
 typeset -i BUSYTHRESHOLD=20
-# We'll actually dynamically change the 'busy' threshold later by looking at the average/median percentage used of all of our processes, we can get a better idea of whats busy and what is 'normal'
-#   Hopefully we'll find the top 5% as 'busy'
+# We'll actually dynamically change the 'busy' threshold later by looking at the
+#  average/median percentage used of all of our processes, we can get a better 
+#  idea of whats busy and what is 'normal'.
+# Hopefully we'll find the top 5% as 'busy'
 typeset -i BUSYONLY=0
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 
 
 
-#=Usage====================================================================================
+#=Usage=========================================================================
 USAGE="[+NAME?${SCRIPTNAME} --- Show AIX LPAR Network Traffic Information]"
 USAGE+="[+DESCRIPTION? This script will show the network activity of an LPAR .]"
 USAGE+="[-author?David Little <david.n.little@gmail.com>]"
@@ -266,12 +268,14 @@ while getopts "$USAGE" optchar ; do
     esac
 done
 shift "$((OPTIND - 1))"
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-# At the start of this script is the function MAKE_FONT_ARRAYS, which will handle fancy fonts and the like.
+
+# At the start of this script is the function MAKE_FONT_ARRAYS, which will 
+#  handle fancy fonts and the like.
 MAKE_FONT_ARRAYS 
 
-#=Sanity====================================================================================
+#=Sanity========================================================================
 if [[ "${OUTPUTFILE}" == "" ]]; then
 	if (( $(tput cols) < 112 )); then
 		# Column width needs to be at least 112
@@ -281,7 +285,8 @@ if [[ "${OUTPUTFILE}" == "" ]]; then
 fi
 
 if (( $(df -m $(dirname /${TRACEFILE})|awk '/^\// {print $3}') < 100 )); then
-	# Free space is less than 100 in targeted system, this is not enough for very busy systems.
+	# Free space is less than 100 in targeted system, this is not enough for
+	#  very busy systems.
 	MSG "There must be at least 100MB free space in the target filesystem."
 	exit 2
 fi
@@ -292,7 +297,8 @@ if (( status == 1 )); then
 	MSG "Unable to find required command, 'startsrc'.  Are you sure you have the correct privileges?"
 	exit 2
 fi
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
 
 
 ################################
@@ -321,8 +327,8 @@ typeset -i COUNTINCOMING=0
 typeset -i COUNTOUTGOING=0
 typeset -i DISCARD=0
 
-#========================================================================================================================
-# The report comes through looking something like this, without the # # obviously:
+#===============================================================================
+# The report comes through looking something like this
 #
 # #====( 130 bytes received on interface en0 )==== 12:12:33.397003947
 # #ETHERNET packet : [ b4:14:89:de:14:41 -> fa:09:6a:20:34:0a ]  type 800  (IP)
@@ -432,7 +438,8 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 	OUT_COUNT="${ARRAY_OUTGOINGTRAFFIC[OUTGOING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]}"
 	IN_COUNT="${ARRAY_INCOMINGTRAFFIC[INCOMING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]}"
 	# Check the values of x_COUNT to see what direction the data was going
-	# Unset DIRECTION, we can check this after the if statement to see if the data was BOTH and has been removed from the arrays
+	# Unset DIRECTION, we can check this after the if statement to see if the 
+	#   data was BOTH and has been removed from the arrays
 	unset ARRAY_OUTGOINGTRAFFIC[OUTGOING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]
 	unset ARRAY_INCOMINGTRAFFIC[INCOMING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]
 	if (( OUT_COUNT != 0 && IN_COUNT != 0 )); then
@@ -444,7 +451,9 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 		DIRECTION=INCOMING
 		OUT_COUNT="0"
 	else
-		# This is likely an INCOMING request which was matched as a 'BOTH', the data for it was removed when it was foudn in both OUTGOING and INCOMING
+		# This is likely an INCOMING request which was matched as a 'BOTH', 
+		#  the data for it was removed when it was foudn in both OUTGOING 
+		#  and INCOMING
 		DIRECTION=""
 	fi
 	
