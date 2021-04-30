@@ -5,15 +5,7 @@
 # Author:  David Little - david.n.little@gmail.com
 #  (C) 2015 by David Little The MIT License (MIT)
 #------------------------------------------------------------------------------------
-# Updated: 
-#	2014/11/12 - DL - 0.0.0 First Draft Started
-#	2014/11/18 - DL - 1.0.0 First Draft Complete
-#	2015/09/22 - DL - 1.0.1 Cleanup and additional checks
-#	2016/06/22 - DL - 1.0.2 Fixed up a bug when checking the free space of the iptrace output dir
-#	2016/06/22 - DL - 1.0.2 Removed typo'd brace
-
 typeset -r VERSION="1.0.2"
-typeset -r UPDATED="2015/09/22"
 typeset -r LICENSE="The MIT License (MIT)"
 typeset -r SCRIPT="$(basename $0 .sh)"
 typeset -r AUTHOR="David Little"
