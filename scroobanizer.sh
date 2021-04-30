@@ -30,7 +30,7 @@ typeset -r AUTHOR="David Little"
 #	
 #------------------------------------------------------------------------------------
 
-{ #=Fancy Fonts====================================================================================
+#=Fancy Fonts====================================================================================
 
 MAKE_FONT_ARRAYS()
 {
@@ -159,9 +159,9 @@ MAKE_FONT_ARRAYS()
 		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0x\033(B\033[0m${FONT[NORMAL]}") #))
 	)
 }
-} #------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
-{ #=Cleanup====================================================================================
+#=Cleanup====================================================================================
 # We set up traps to ensure that the trace is correctly stopped
 trap 'CLEANUP SIGINT;exit' SIGINT
 trap 'CLEANUP; exit' SIGQUIT
@@ -200,9 +200,9 @@ CLEANUP()
 	[[ "$1" == SIGINT ]] && exit 1
 	exit 0
 }
-} #------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
-{ #=Globals====================================================================================
+#=Globals====================================================================================
 typeset -i PAGEWIDTH="108"
 typeset -r SCRIPTNAME=$(basename $0)
 typeset OUTFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
@@ -212,9 +212,12 @@ typeset -i BUSYTHRESHOLD=20
 # We'll actually dynamically change the 'busy' threshold later by looking at the average/median percentage used of all of our processes, we can get a better idea of whats busy and what is 'normal'
 #   Hopefully we'll find the top 5% as 'busy'
 typeset -i BUSYONLY=0
-} #------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
-{ #=Usage====================================================================================
+
+
+
+#=Usage====================================================================================
 USAGE="[+NAME?${SCRIPTNAME} --- Show AIX LPAR Network Traffic Information]"
 USAGE+="[+DESCRIPTION? This script will show the network activity of an LPAR .]"
 USAGE+="[-author?David Little <david.n.little@gmail.com>]"
@@ -233,17 +236,12 @@ while getopts "$USAGE" optchar ; do
     esac
 done
 shift "$((OPTIND - 1))"
-} #------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
 # At the start of this script is the function MAKE_FONT_ARRAYS, which will handle fancy fonts and the like.
 MAKE_FONT_ARRAYS 
 
-{ #=Sanity====================================================================================
-if (( $(tput cols) < 112 )); then
-	# Column width needs to be at least 112
-	echo "There must be at least 112 columns in your terminal (Currently: $(tput cols)"
-	exit 2
-fi
+#=Sanity====================================================================================
 
 if (( $(df -m $(dirname /${OUTFILE})|awk '/^\// {print $3}') < 100 )); then
 	# Free space is less than 100 in targeted system, this is not enough for very busy systems.
@@ -257,7 +255,7 @@ if (( status == 1 )); then
 	echo "Unable to find required command, 'startsrc'.  Are you sure you have the correct privileges?"
 	exit 2
 fi
-} #------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
 
 ################################
