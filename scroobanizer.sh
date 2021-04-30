@@ -185,9 +185,9 @@ CLEANUP()
 			printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${LINE}"
 		done
 	fi
-	if [[ -w "${OUTFILE}" && -e "${OUTFILE}" ]]; then
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Removing ${OUTFILE}"
-		rm "${OUTFILE}"
+	if [[ -w "${TRACEFILE}" && -e "${TRACEFILE}" ]]; then
+		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Removing ${TRACEFILE}"
+		rm "${TRACEFILE}"
 	fi
 	################################
 	(
@@ -205,7 +205,7 @@ CLEANUP()
 #=Globals====================================================================================
 typeset -i PAGEWIDTH="108"
 typeset -r SCRIPTNAME=$(basename $0)
-typeset OUTFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
+typeset TRACEFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
 typeset MYIP=$(ifconfig -a|awk '/inet / {print $2;exit}')
 typeset -i SLEEP=10
 typeset -i BUSYTHRESHOLD=20
@@ -225,13 +225,14 @@ USAGE+="[-copyright?Free to use and modify - Use at own risk.]"
 USAGE+="[-license?${LICENSE}]"
 
 USAGE+="[b:busy-only?Display only busy IP addresses. Disabled by default.]"
-USAGE+="[f:file?Location to store tcpdump file]:[OUTFILE:=${OUTFILE}]"
+USAGE+="[t:trace?Location to store tcpdump file]:[TRACEFILE:=${TRACEFILE}]"
+USAGE+="[o:output?Location to redirect the report itself.]:[OUTPUTFILE:=${OUTPUTFILE}]"
 USAGE+="[s:sleep?Length in seconds to measure network traffic.]#[SLEEP:=${SLEEP}]"
 USAGE+=$'\n\n'
 while getopts "$USAGE" optchar ; do
     case $optchar in
 		b)  BUSYONLY=1 ;;
-		f)  OUTFILE=$OPTARG ;;
+		f)  TRACEFILE=$OPTARG ;;
 		s)  SLEEP=$OPTARG ;;
     esac
 done
@@ -243,7 +244,7 @@ MAKE_FONT_ARRAYS
 
 #=Sanity====================================================================================
 
-if (( $(df -m $(dirname /${OUTFILE})|awk '/^\// {print $3}') < 100 )); then
+if (( $(df -m $(dirname /${TRACEFILE})|awk '/^\// {print $3}') < 100 )); then
 	# Free space is less than 100 in targeted system, this is not enough for very busy systems.
 	echo "There must be at least 100MB free space in the target filesystem."
 	exit 2
@@ -267,8 +268,8 @@ fi
 )|sed "s/ /${BOX[BMM].BOLD}/g"
 ################################
 printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${SCRIPT}: v${VERSION}: By ${AUTHOR} on ${UPDATED} ${LICENSE}"
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Starting Trace, outputting to ${OUTFILE}"
-startsrc -s iptrace -a "${OUTFILE}"|while read LINE; do
+printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Starting Trace, outputting to ${TRACEFILE}"
+startsrc -s iptrace -a "${TRACEFILE}"|while read LINE; do
 	printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${LINE}"
 done
 printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Sleeping for ${SLEEP} seconds"
@@ -326,7 +327,7 @@ typeset -i DISCARD=0
 #			printf
 #
 
-ipreport -N ${OUTFILE} | egrep '(< (SRC|DST) =|<source port)|ip_[a-b]+='|egrep -v "${MYIP}|127.0.0.1|::1"|awk '{printf $2" "$4;getline;printf " "$2" "$4"\n"}'|sed 's/,//g;s/(.*)//;s/port=//g'|while read -A LINE; do
+ipreport -N ${TRACEFILE} | egrep '(< (SRC|DST) =|<source port)|ip_[a-b]+='|egrep -v "${MYIP}|127.0.0.1|::1"|awk '{printf $2" "$4;getline;printf " "$2" "$4"\n"}'|sed 's/,//g;s/(.*)//;s/port=//g'|while read -A LINE; do
 	SRCDST=${LINE[0]}
 	IP=${LINE[1]}
 	SRCPRT=${LINE[2]}
