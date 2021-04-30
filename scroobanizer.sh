@@ -167,39 +167,68 @@ trap 'CLEANUP; exit' SIGQUIT
 CLEANUP()
 {
 	################################
-	(
-		printf "${BOX[CVR].BOLD}" 
-		printf " %${PAGEWIDTH}s "
-		printf "${BOX[CVL].BOLD}"
-		printf "\n"
-	)|sed "s/ /${BOX[BMM].BOLD}/g"
+	MSG BOX_MIDDLE
 	################################
 	if [[ "$1" == SIGINT ]]; then
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Entered Cleanup with SIGINT"
+		MSG "Entered Cleanup with SIGINT"
 	fi
 	IPTRACESTATUS=$(lssrc -s iptrace|awk '/iptrace/{print $3}')
 	if [[ "${IPTRACESTATUS}" != inoperative ]]; then
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Stopping IPTrace"
+		MSG "Stopping IPTrace"
 		stopsrc -s iptrace|while read LINE; do
-			printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${LINE}"
+			MSG "${LINE}"
 		done
 	fi
 	if [[ -w "${TRACEFILE}" && -e "${TRACEFILE}" ]]; then
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Removing ${TRACEFILE}"
+		MSG "Removing ${TRACEFILE}"
 		rm "${TRACEFILE}"
 	fi
 	################################
-	(
-		printf "${BOX[CLL].BOLD}" 
-		printf " %${PAGEWIDTH}s "
-		printf "${BOX[CLR].BOLD}"
-		printf "\n"
-	)|sed "s/ /${BOX[BMM].BOLD}/g"
+	MSG BOX_BOTTOM
 	################################
 	[[ "$1" == SIGINT ]] && exit 1
 	exit 0
 }
 #------------------------------------------------------------------------------------
+
+MSG() {
+	MESSAGE="$*"
+	if [[ "${MESSAGE}" == BOX_TOP ]]; then
+		(
+			printf "%s" "${BOX[CUL].BOLD}" 
+			printf " %${PAGEWIDTH}s " ""
+			printf "%s" "${BOX[CUR].BOLD}"
+			printf "\n"
+		)|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+	elif [[ "${MESSAGE}" == BOX_MIDDLE ]]; then
+		(
+			printf "%s" "${BOX[CVR].BOLD}" 
+			printf " %${PAGEWIDTH}s " ""
+			printf "%s" "${BOX[CVL].BOLD}"
+			printf "\n"
+		)|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+	elif [[ "${MESSAGE}" == BOX_BOTTOM ]]; then
+		(
+            printf "%s" "${BOX[CLL].BOLD}" 
+            printf " %${PAGEWIDTH}s " ""
+            printf "%s" "${BOX[CLR].BOLD}"
+            printf "\n"
+        )|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+	else
+		(
+            printf "%s" "${BOX[BVV].BOLD}"
+            printf " %-${PAGEWIDTH}s " "${MESSAGE}"
+            printf "%s" "${BOX[BVV].BOLD}"
+        )|read -r MESSAGE
+    fi
+
+	if [[ "${OUTPUTFILE}" ]]; then
+		echo "${MESSAGE}" >> "${OUTPUTFILE}"
+	else
+		echo "${MESSAGE}"
+	fi
+}
+
 
 #=Globals====================================================================================
 typeset -i PAGEWIDTH="108"
@@ -232,6 +261,7 @@ while getopts "$USAGE" optchar ; do
     case $optchar in
 		b)  BUSYONLY=1 ;;
 		f)  TRACEFILE=$OPTARG ;;
+        o)  OUTPUTFILE=$OPTARG ;;
 		s)  SLEEP=$OPTARG ;;
     esac
 done
@@ -242,50 +272,47 @@ shift "$((OPTIND - 1))"
 MAKE_FONT_ARRAYS 
 
 #=Sanity====================================================================================
+if [[ "${OUTPUTFILE}" == "" ]]; then
+	if (( $(tput cols) < 112 )); then
+		# Column width needs to be at least 112
+		MSG "There must be at least 112 columns in your terminal (Currently: $(tput cols)"
+		exit 2
+	fi
+fi
 
 if (( $(df -m $(dirname /${TRACEFILE})|awk '/^\// {print $3}') < 100 )); then
 	# Free space is less than 100 in targeted system, this is not enough for very busy systems.
-	echo "There must be at least 100MB free space in the target filesystem."
+	MSG "There must be at least 100MB free space in the target filesystem."
 	exit 2
 fi
 
 which startsrc >/dev/null 2>&1
 status=$?
 if (( status == 1 )); then
-	echo "Unable to find required command, 'startsrc'.  Are you sure you have the correct privileges?"
+	MSG "Unable to find required command, 'startsrc'.  Are you sure you have the correct privileges?"
 	exit 2
 fi
 #------------------------------------------------------------------------------------
 
 
 ################################
-(
-	printf "${BOX[CUL].BOLD}" 
-	printf " %${PAGEWIDTH}s "
-	printf "${BOX[CUR].BOLD}"
-	printf "\n"
-)|sed "s/ /${BOX[BMM].BOLD}/g"
+MSG BOX_TOP
 ################################
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${SCRIPT}: v${VERSION}: By ${AUTHOR} on ${UPDATED} ${LICENSE}"
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Starting Trace, outputting to ${TRACEFILE}"
+MSG "${SCRIPT}: v${VERSION}: By ${AUTHOR} on ${UPDATED} ${LICENSE}"
+MSG "Starting Trace, outputting to ${TRACEFILE}"
 startsrc -s iptrace -a "${TRACEFILE}"|while read LINE; do
-	printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${LINE}"
+	MSG "${LINE}"
 done
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Sleeping for ${SLEEP} seconds"
-sleep ${SLEEP}
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Stopping Trace"
+MSG  "Sleeping for ${SLEEP} seconds"
+sleep "${SLEEP}"
+MSG  "Stopping Trace"
 stopsrc -s iptrace|while read LINE; do
-	printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "${LINE}"
+	MSG "${LINE}"
 done
 ################################
-(
-	printf "${BOX[CVR].BOLD}" 
-	printf " %${PAGEWIDTH}s "
-	printf "${BOX[CVL].BOLD}"
-	printf "\n"
-)|sed "s/ /${BOX[BMM].BOLD}/g"
+MSG BOX_MIDDLE
 ################################
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Generating IP Report and gathering information"
+MSG "Generating IP Report and gathering information"
 typeset -A ARRAY_INCOMINGTRAFFIC
 typeset -A ARRAY_OUTGOINGTRAFFIC
 typeset -A BUSYIP
@@ -367,33 +394,29 @@ done|sort|uniq -c| while read -A LINE; do
 	fi
 done
 ################################
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Report completed."
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Sample Length (seconds): ${SLEEP}"
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Total Packets In: $COUNTINCOMING"
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Total Packets Out: $COUNTOUTGOING"
-printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Discarded Results: ${DISCARD}"
-(( "${BUSYONLY}" == 1 )) && printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n"  "Displaying only busy processes."
+MSG "Report completed."
+MSG "Sample Length (seconds): ${SLEEP}"
+MSG "Total Packets In: $COUNTINCOMING"
+MSG "Total Packets Out: $COUNTOUTGOING"
+MSG "Discarded Results: ${DISCARD}"
+(( "${BUSYONLY}" == 1 )) && MSG  "Displaying only busy processes."
 ################################
-(
-	printf "${BOX[CVR].BOLD}" 
-	printf " %${PAGEWIDTH}s "
-	printf "${BOX[CVL].BOLD}"
-	printf "\n"
-)|sed "s/ /${BOX[BMM].BOLD}/g"
+MSG BOX_MIDDLE
 ################################
 
 #Direction  :LPort        Remote IP:RPort     IN#     IN%    OUT#    OUT%
-printf "${BOX[BVV].BOLD}"
-printf " %-10s ${BOX[BVV].NORM}" "Direction"
-printf " :%5s ${BOX[BVV].NORM}"  "LPort"
-printf " %16s:%-5s ${BOX[BVV].NORM}"  "Remote IP" "RPort"
-printf " %7s ${BOX[BVV].NORM}"  "IN#"
-printf " %6s ${BOX[BVV].NORM}"  "IN%"
-printf " %7s ${BOX[BVV].NORM}"  "OUT#"
-printf " %6s ${BOX[BVV].NORM}"  'OUT%'
-printf "%-10s%10s${BOX[BVV].NORM}" "> IN%" " %OUT <"
-printf "%4s${BOX[BVV].BOLD}" ""
-printf '\n'
+{
+    printf " %-10s ${BOX[BVV].NORM}" "Direction"
+    printf " :%5s ${BOX[BVV].NORM}"  "LPort"
+    printf " %15s:%-5s ${BOX[BVV].NORM}"  "Remote IP" "RPort"
+    printf " %7s ${BOX[BVV].NORM}"  "IN#"
+    printf " %6s ${BOX[BVV].NORM}"  "IN%"
+    printf " %7s ${BOX[BVV].NORM}"  "OUT#"
+    printf " %6s ${BOX[BVV].NORM}"  'OUT%'
+    printf "%-10s%10s${BOX[BVV].NORM}" "> IN%" " %OUT <"
+    printf "----"
+}|read -r _msg
+MSG "${_msg}"
 
 typeset -i OUT_COUNT
 typeset -i IN_COUNT
@@ -434,55 +457,51 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 			BUSY=1 # Set busy flag
 		fi
 		if (( BUSY==1 || BUSYONLY==0 )); then
-			printf "${BOX[BVV].BOLD}"
-			printf " %-10s ${BOX[BVV].NORM}"		"${DIRECTION}"
-			printf " :%-5s ${BOX[BVV].NORM}"		"${LOCALPORT}"
-			printf " %16s:%-5s ${BOX[BVV].NORM}"	"${REMOTEIP}" "${REMOTEPORT}"
-			printf " %7i ${BOX[BVV].NORM}"			"${IN_COUNT}"
-			printf " %6.2f ${BOX[BVV].NORM}" 		"${IN_COUNTPERC}"
-			printf " %7i ${BOX[BVV].NORM}"			"${OUT_COUNT}"
-			printf " %6.2f ${BOX[BVV].NORM}" 		"${OUT_COUNTPERC}"
-			OUTBARLEN=$((OUT_COUNTPERC/10))
-			INBARLEN=$((IN_COUNTPERC/10))
-			OUTBAR=$(printf %${OUTBARLEN}s|sed 's/ /</g')
-			INBAR=$(printf %${INBARLEN}s|sed 's/ />/g')
-			printf "%-10s%10s${BOX[BVV].NORM}" "${INBAR}" "${OUTBAR}"
-			printf "%4s${BOX[BVV].BOLD}" $( (( BUSY == 1 )) && echo "Busy" ) # (( BUSY ? "BUSY" : "" )) might work ?
-			BUSY=0 # Unset busy flag
-			printf '\n'
+			{
+                printf " %-10s ${BOX[BVV].NORM}"		"${DIRECTION}"
+                printf " :%-5s ${BOX[BVV].NORM}"		"${LOCALPORT}"
+                printf " %15s:%-5s ${BOX[BVV].NORM}"	"${REMOTEIP}" "${REMOTEPORT}"
+                printf " %7i ${BOX[BVV].NORM}"			"${IN_COUNT}"
+                printf " %6.2f ${BOX[BVV].NORM}" 		"${IN_COUNTPERC}"
+                printf " %7i ${BOX[BVV].NORM}"			"${OUT_COUNT}"
+                printf " %6.2f ${BOX[BVV].NORM}" 		"${OUT_COUNTPERC}"
+                OUTBARLEN=$((OUT_COUNTPERC/10))
+                INBARLEN=$((IN_COUNTPERC/10))
+                OUTBAR=$(printf %${OUTBARLEN}s|sed 's/ /</g')
+                INBAR=$(printf %${INBARLEN}s|sed 's/ />/g')
+                printf "%-10s%10s${BOX[BVV].NORM}" "${INBAR}" "${OUTBAR}"
+                if (( BUSY == 1 )); then
+                    printf "Busy"
+                else
+                    printf "----"
+                fi
+                # printf "%4s" "$( (( BUSY == 1 )) && echo "Busy" || echo " " )" # (( BUSY ? "BUSY" : "" )) might work ?
+                BUSY=0 # Unset busy flag
+            } | read -r _msg
+            MSG "${_msg}"
 		fi
 	fi
 done
 ################################
-(
-	printf "${BOX[CVR].BOLD}" 
-	printf " %${PAGEWIDTH}s "
-	printf "${BOX[CVL].BOLD}"
-	printf "\n"
-)|sed "s/ /${BOX[BMM].BOLD}/g"
+MSG BOX_MIDDLE
 ################################
 
 if [[ "${!BUSYIP[*]}" != "" ]]; then
-	printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "Busy IP Analysis"
+	MSG "Busy IP Analysis"
 	for IP in ${!BUSYIP[*]}; do
-		(
-			printf "${BOX[CVR].BOLD}" 
-			printf " %${PAGEWIDTH}s "
-			printf "${BOX[CVL].BOLD}"
-			printf "\n"
-		)|sed "s/ /${BOX[BMM].BOLD}/g"
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "  IP: ${IP}"
+        MSG BOX_MIDDLE
+		MSG "  IP: ${IP}"
 		typeset -F2 TRAFFICIN=${BUSYIP[${IP}]%,*}
 		typeset -F2 TRAFFICOUT=${BUSYIP[${IP}]#*,}
-		printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "   Network Traffic In: ${TRAFFICIN}% Out: ${TRAFFICOUT}%"
+		MSG "   Network Traffic In: ${TRAFFICIN}% Out: ${TRAFFICOUT}%"
 		lsof -Pni @${IP} 2>/dev/null|egrep -v '^COMMAND'|while read -A LINE; do
-			printf "${BOX[BVV].BOLD} %-${PAGEWIDTH}s ${BOX[BVV].BOLD}\n" "    Process Found:"
-			printf "${BOX[BVV].BOLD} %12s: %-$((PAGEWIDTH-13))s${BOX[BVV].BOLD}\n" PID ${LINE[1]}
-			printf "${BOX[BVV].BOLD} %12s: %-$((PAGEWIDTH-13))s${BOX[BVV].BOLD}\n" CMD ${LINE[0]}
-			printf "${BOX[BVV].BOLD} %12s: %-$((PAGEWIDTH-13))s${BOX[BVV].BOLD}\n" USER ${LINE[2]}
-			printf "${BOX[BVV].BOLD} %12s: %-$((PAGEWIDTH-13))s${BOX[BVV].BOLD}\n" NAME ${LINE[8]}
+			MSG "    Process Found:"
+            MSG " PID ${LINE[1]})"
+			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" CMD "${LINE[0]}")"
+			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" USER "${LINE[2]}")"
+			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" NAME "${LINE[8]}")"
 			BPSARGS="$(ps -efo pid,args|egrep "^ *${LINE[1]} "|sed 's/^ *[0-9]* //')"
-			printf "${BOX[BVV].BOLD} %12s: %-$((PAGEWIDTH-13))s${BOX[BVV].BOLD}\n" ARGS "${BPSARGS}"
+			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" ARGS "${BPSARGS}")"
 		done
 	done
 fi
