@@ -545,12 +545,12 @@ if [[ "${!BUSYIP[*]}" != "" ]]; then
 		MSG "   Network Traffic In: ${TRAFFICIN}% Out: ${TRAFFICOUT}%"
 		lsof -Pni @${IP} 2>/dev/null|grep -E -v '^COMMAND'|while read -r -A LINE; do
 			MSG "    Process Found:"
-            MSG " PID ${LINE[1]})"
-			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" CMD "${LINE[0]}")"
-			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" USER "${LINE[2]}")"
-			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" NAME "${LINE[8]}")"
+            MSG "      PID ${LINE[1]}:"
+			MSG "$(printf "%12s: %s" CMD "${LINE[0]}")"
+			MSG "$(printf "%12s: %s" USER "${LINE[2]}")"
+			MSG "$(printf "%12s: %s" NAME "${LINE[8]}")"
 			BPSARGS="$(ps -efo pid,args|grep -E "^ *${LINE[1]} "|sed 's/^ *[0-9]* //')"
-			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" ARGS "${BPSARGS}")"
+			MSG "$(printf "%12s: %s" ARGS "${BPSARGS}")"
 		done
 	done
 fi
