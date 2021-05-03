@@ -1,0 +1,11 @@
+# Allow [ ! -z foo ] instead of suggesting -n
+disable=SC2236
+
+# Do not check for pgrep on AIX
+disable=SC2009
+
+# Do not check for modifications in subshells
+disable=SC2030
+disable=SC2031
+
+# disable=SC2207
