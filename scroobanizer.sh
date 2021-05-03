@@ -1,6 +1,5 @@
 #!/usr/bin/ksh93
 #-------------------------------------------------------------------------------
-
 # Script:  scroobanizer.sh
 # Created: 2014/11/12
 # Author:  David Little - david.n.little@gmail.com
@@ -29,6 +28,11 @@ typeset -r AUTHOR="David Little"
 #	
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# This script uses https://github.com/koalaman/shellcheck for linting purposes.
+# As it's ksh93, a few checks do not apply.  These are disabled throughout the
+#  script.
+#-------------------------------------------------------------------------------
 
 #=Fancy Fonts===================================================================
 MAKE_FONT_ARRAYS()
@@ -317,7 +321,7 @@ done
 MSG  "Sleeping for ${SLEEP} seconds"
 sleep "${SLEEP}"
 MSG  "Stopping Trace"
-stopsrc -s iptrace|while read LINE; do
+stopsrc -s iptrace|while read -r LINE; do
 	MSG "${LINE}"
 done
 ################################
@@ -363,7 +367,7 @@ typeset -i DISCARD=0
 #			printf
 #
 
-ipreport -N ${TRACEFILE} | egrep '(< (SRC|DST) =|<source port)|ip_[a-b]+='|egrep -v "${MYIP}|127.0.0.1|::1"|awk '{printf $2" "$4;getline;printf " "$2" "$4"\n"}'|sed 's/,//g;s/(.*)//;s/port=//g'|while read -A LINE; do
+ipreport -N "${TRACEFILE}" | grep -E '(< (SRC|DST) =|<source port)|ip_[a-b]+='|grep -E -v "${MYIP}|127.0.0.1|::1"|awk '{printf $2" "$4;getline;printf " "$2" "$4"\n"}'|sed 's/,//g;s/(.*)//;s/port=//g'|while read -r -A LINE; do
 	SRCDST=${LINE[0]}
 	IP=${LINE[1]}
 	SRCPRT=${LINE[2]}
@@ -388,7 +392,7 @@ ipreport -N ${TRACEFILE} | egrep '(< (SRC|DST) =|<source port)|ip_[a-b]+='|egrep
 			((DISCARD+=1))
 		fi
 	fi
-done|sort|uniq -c| while read -A LINE; do
+done|sort|uniq -c| while read -r -A LINE; do
 	COUNT=${LINE[0]}
 	DIRECTION=${LINE[1]}
 	if [[ "${DIRECTION}" == INCOMING ]]; then
@@ -434,7 +438,7 @@ typeset DIRECTION
 
 for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 	# INCOMING LOCALPORT REMOTEIP:REMOTEPORT COUNT
-	echo ${INDEX//,/ }|read -A TMPARR
+	echo "${INDEX//,/ }"|read -r -A TMPARR
 	#DIRECTION=${TMPARR[0]}
 	LOCALPORT=${TMPARR[1]}
 	REMOTEIP=${TMPARR[2]}
@@ -444,8 +448,8 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 	# Check the values of x_COUNT to see what direction the data was going
 	# Unset DIRECTION, we can check this after the if statement to see if the 
 	#   data was BOTH and has been removed from the arrays
-	unset ARRAY_OUTGOINGTRAFFIC[OUTGOING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]
-	unset ARRAY_INCOMINGTRAFFIC[INCOMING,${LOCALPORT},${REMOTEIP},${REMOTEPORT}]
+	unset ARRAY_OUTGOINGTRAFFIC[OUTGOING,"${LOCALPORT}","${REMOTEIP}","${REMOTEPORT}"]
+	unset ARRAY_INCOMINGTRAFFIC[INCOMING,"${LOCALPORT}","${REMOTEIP}","${REMOTEPORT}"]
 	if (( OUT_COUNT != 0 && IN_COUNT != 0 )); then
 		DIRECTION=BOTH
 	elif (( OUT_COUNT != 0 )); then
@@ -507,13 +511,13 @@ if [[ "${!BUSYIP[*]}" != "" ]]; then
 		typeset -F2 TRAFFICIN=${BUSYIP[${IP}]%,*}
 		typeset -F2 TRAFFICOUT=${BUSYIP[${IP}]#*,}
 		MSG "   Network Traffic In: ${TRAFFICIN}% Out: ${TRAFFICOUT}%"
-		lsof -Pni @${IP} 2>/dev/null|egrep -v '^COMMAND'|while read -A LINE; do
+		lsof -Pni @${IP} 2>/dev/null|grep -E -v '^COMMAND'|while read -r -A LINE; do
 			MSG "    Process Found:"
             MSG " PID ${LINE[1]})"
 			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" CMD "${LINE[0]}")"
 			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" USER "${LINE[2]}")"
 			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" NAME "${LINE[8]}")"
-			BPSARGS="$(ps -efo pid,args|egrep "^ *${LINE[1]} "|sed 's/^ *[0-9]* //')"
+			BPSARGS="$(ps -efo pid,args|grep -E "^ *${LINE[1]} "|sed 's/^ *[0-9]* //')"
 			MSG "$(printf "%12s: %-$((PAGEWIDTH-14))s" ARGS "${BPSARGS}")"
 		done
 	done
