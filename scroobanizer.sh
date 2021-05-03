@@ -38,128 +38,167 @@ typeset -r AUTHOR="David Little"
 MAKE_FONT_ARRAYS()
 {
 	#===========================================================================
-	typeset -A FONT=( 
-		[UNDERLINE]="\033[4m" 
-		[NORMAL]="\033[0m"
-		[BOLD]="\033[37;1m"
-		[BLACK_F]="\033[0;30m"
-		[RED_F]="\033[0;31m"
-		[GREEN_F]="\033[0;32m"
-		[BROWN_F]="\033[0;33m"
-		[BLUE_F]="\033[0;34m"
-		[PURPLE_F]="\033[0;35m"
-		[CYAN_F]="\033[0;36m"
-		[LIGHTGRAY_F]="\033[0;37m"
-		[DARKGRAY_F]="\033[1;30m"
-		[LIGHTRED_F]="\033[1;31m"
-		[LIGHTGREEN_F]="\033[1;32m"
-		[YELLOW_F]="\033[1;33m"
-		[LIGHTBLUE_F]="\033[1;34m"
-		[PINK_F]="\033[1;35m"
-		[LIGHTCYAN_F]="\033[1;36m"
-		[WHITE_F]="\033[1;37m"
-		[BLACK_B]="\033[40m"
-		[RED_B]="\033[41m"
-		[GREEN_B]="\033[42m" 
-		[YELLOW_B]="\033[43m"
-		[BLUE_B]="\033[44m"
-		[MAGENTA_B]="\033[45m"
-		[CYAN_B]="\033[46m"
-		[WHITE_B]="\033[47m"
-	)
+    if [[ "${BOXES}" == "ENABLED" ]]; then
+        typeset -A FONT=( 
+            [UNDERLINE]='\033[4m'
+            [NORMAL]='\033[0m'
+            [BOLD]='\033[37;1m'
+            [BLACK_F]='\033[0;30m'
+            [RED_F]='\033[0;31m'
+            [GREEN_F]='\033[0;32m'
+            [BROWN_F]='\033[0;33m'
+            [BLUE_F]='\033[0;34m'
+            [PURPLE_F]='\033[0;35m'
+            [CYAN_F]='\033[0;36m'
+            [LIGHTGRAY_F]='\033[0;37m'
+            [DARKGRAY_F]='\033[1;30m'
+            [LIGHTRED_F]='\033[1;31m'
+            [LIGHTGREEN_F]='\033[1;32m'
+            [YELLOW_F]='\033[1;33m'
+            [LIGHTBLUE_F]='\033[1;34m'
+            [PINK_F]='\033[1;35m'
+            [LIGHTCYAN_F]='\033[1;36m'
+            [WHITE_F]='\033[1\;37m'
+            [BLACK_B]='\033[40m'
+            [RED_B]='\033[41m'
+            [GREEN_B]='\033[42m'
+            [YELLOW_B]='\033[43m'
+            [BLUE_B]='\033[44m'
+            [MAGENTA_B]='\033[45m'
+            [CYAN_B]='\033[46m'
+            [WHITE_B]='\033[47m'
+        )
+    fi
 
-	typeset -A FONT_FB1=( 
-		[0]="${FONT[WHITE_F]}${FONT[BLUE_B]}" [1]="${FONT[BLACK_F]}${FONT[GREEN_B]}" [2]="${FONT[WHITE_F]}${FONT[MAGENTA_B]}" 
-		[3]="${FONT[WHITE_F]}${FONT[CYAN_B]}" [4]="${FONT[BLACK_F]}${FONT[YELLOW_B]}" [5]="${FONT[WHITE_F]}${FONT[RED_B]}" 
-		[6]="${FONT[BLACK_F]}${FONT[WHITE_B]}" [7]="${FONT[WHITE_F]}${FONT[BLACK_B]}"
-	)
-	FONT_FB1_COUNT=8
-	typeset -A FONT_FB2=( 
-		[0]="${FONT[BLACK_F]}${FONT[CYAN_B]}" [1]="${FONT[BLACK_F]}${FONT[RED_B]}" [2]="${FONT[WHITE_F]}${FONT[YELLOW_B]}" 
-		[3]="${FONT[WHITE_F]}${FONT[MAGENTA_B]}" [4]="${FONT[WHITE_F]}${FONT[BLUE_B]}" [5]="${FONT[MAGENTA_F]}${FONT[GREEN_B]}" 
-		[6]="${FONT[BLACK_F]}${FONT[WHITE_B]}" [7]="${FONT[WHITE_F]}${FONT[BLACK_B]}"
-	)
-	FONT_FB2_COUNT=8
+	# typeset -A FONT_FB1=( 
+	# 	[0]="${FONT[WHITE_F]}${FONT[BLUE_B]}" [1]="${FONT[BLACK_F]}${FONT[GREEN_B]}" [2]="${FONT[WHITE_F]}${FONT[MAGENTA_B]}" 
+	# 	[3]="${FONT[WHITE_F]}${FONT[CYAN_B]}" [4]="${FONT[BLACK_F]}${FONT[YELLOW_B]}" [5]="${FONT[WHITE_F]}${FONT[RED_B]}" 
+	# 	[6]="${FONT[BLACK_F]}${FONT[WHITE_B]}" [7]="${FONT[WHITE_F]}${FONT[BLACK_B]}"
+	# )
+	# FONT_FB1_COUNT=8
+	# typeset -A FONT_FB2=( 
+	# 	[0]="${FONT[BLACK_F]}${FONT[CYAN_B]}" [1]="${FONT[BLACK_F]}${FONT[RED_B]}" [2]="${FONT[WHITE_F]}${FONT[YELLOW_B]}" 
+	# 	[3]="${FONT[WHITE_F]}${FONT[MAGENTA_B]}" [4]="${FONT[WHITE_F]}${FONT[BLUE_B]}" [5]="${FONT[MAGENTA_F]}${FONT[GREEN_B]}" 
+	# 	[6]="${FONT[BLACK_F]}${FONT[WHITE_B]}" [7]="${FONT[WHITE_F]}${FONT[BLACK_B]}"
+	# )
+	# FONT_FB2_COUNT=8
 	#===========================================================================
 
 	#===========================================================================
 	# Set up the boxes!
 	typeset -A BOX
-	BOX["CLR"]=( # Lower right hand corner
-		NORM=$(echo "\033(0j\033(B\033[0m}") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0j\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0j\033(B\033[0m${FONT[NORMAL]}") #))
-	)
-	BOX["CUR"]=( # Upper right hand corner
-		NORM=$(echo "\033(0k\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0k\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0k\033(B\033[0m${FONT[NORMAL]}") #))
-	)
-	BOX["CUL"]=( # Upper left hand corner
-		NORM=$(echo "\033(0l\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0l\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0l\033(B\033[0m${FONT[NORMAL]}") #))
-	)
-	BOX["CLL"]=( # Lower left hand corner
-		NORM=$(echo "\033(0m\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0m\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0m\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["CMX"]=( # Midpoint X
-		NORM=$(echo "\033(0n\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0n\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0n\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["BHH"]=( # High bar
-		NORM=$(echo "\033(0o\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0o\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0o\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["BHM"]=( # Middle-high bar
-		NORM=$(echo "\033(0p\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0p\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0p\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["BMM"]=( # Midbar
-		NORM=$(echo "\033(0q\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0q\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0q\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["BML"]=( # Mid-Low bar
-		NORM=$(echo "\033(0r\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0r\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0r\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["BLL"]=( # Lowbar
-		NORM=$(echo "\033(0s\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0s\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0s\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["CVR"]=(  # Corner Vertical Midpoint Right
-		NORM=$(echo "\033(0t\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0t\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0t\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["CVL"]=( # Corner Vertical Midpoint Left
-		NORM=$(echo "\033(0u\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0u\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0u\033(B\033[0m${FONT[NORMAL]}") #)) 
-	)
-	BOX["CHU"]=( # Corner Horizontal Midpoint Up
-		NORM=$(echo "\033(0v\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0v\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0v\033(B\033[0m${FONT[NORMAL]}") #))
-	)
-	BOX["CHD"]=(  # Corner Horizontal Midpoint Down
-		NORM=$(echo "\033(0w\033(B\033[0m") #))
-		BOLD=$(echo "${FONT[BOLD]}\033(0w\033(B\033[0m${FONT[NORMAL]}") #)) 
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0w\033(B\033[0m${FONT[NORMAL]}") #))
-	)
-	BOX["BVV"]=( # Vertical Bar
-		NORM=$(echo "\033(0x\033(B\033[0m") #)) 
-		BOLD=$(echo "${FONT[BOLD]}\033(0x\033(B\033[0m${FONT[NORMAL]}") #))
-		DULL=$(echo "${FONT[DARKGRAY_F]}\033(0x\033(B\033[0m${FONT[NORMAL]}") #))
-	)
+    if [[ "${BOXES}" != "DISABLED" ]]; then
+        # Lower right hand corner
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0j\033(B\033[0m'
+        BOX["CLR"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Upper right hand corner
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0k\033(B\033[0m'
+        BOX["CUR"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Upper left hand corner
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0l\033(B\033[0m'
+        BOX["CUL"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Lower left hand corner
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0m\033(B\033[0m'
+        BOX["CLL"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Midpoint X
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0n\033(B\033[0m'
+        BOX["CMX"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # High bar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='-' || _box='\033(0o\033(B\033[0m'
+        BOX["BHH"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Middle-high bar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='-' || _box='\033(0p\033(B\033[0m'
+        BOX["BHM"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Midbar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='-' || _box='\033(0q\033(B\033[0m'
+        BOX["BMM"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Mid-Low bar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='-' || _box='\033(0r\033(B\033[0m'
+        BOX["BML"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Lowbar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='-' || _box='\033(0s\033(B\033[0m'
+        BOX["BLL"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Corner Vertical Midpoint Right
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0t\033(B\033[0m'
+        BOX["CVR"]=(  
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Corner Vertical Midpoint Left
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0u\033(B\033[0m'
+        BOX["CVL"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Corner Horizontal Midpoint Up
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0v\033(B\033[0m'
+        BOX["CHU"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Corner Horizontal Midpoint Down
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='+' || _box='\033(0w\033(B\033[0m'
+        BOX["CHD"]=(  
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+        # Vertical Bar
+        [[ "${BOXES}" == "SIMPLE" ]] && _box='|' || _box='\033(0x\033(B\033[0m'
+        BOX["BVV"]=( 
+            NORM="${_box}"
+            BOLD="${FONT[BOLD]}${_box}${FONT[NORMAL]}"
+            DULL="${FONT[DARKGRAY_F]}${_box}${FONT[NORMAL]}"
+        )
+
+        # shellcheck disable=SC2034  # We just need to iterate across a list of PAGEWITH length
+        for x in $(seq -s ' ' 1 "$((PAGEWIDTH + 2 ))"); do
+            printf "%s" "${BOX[BMM].BOLD}"
+        done | read -r BAR_HR
+    fi
 }
 #-------------------------------------------------------------------------------
 
@@ -197,33 +236,18 @@ CLEANUP()
 #=MSG===========================================================================
 MSG() {
 	MESSAGE="$*"
-	if [[ "${MESSAGE}" == BOX_TOP ]]; then
-		(
-			printf "%s" "${BOX[CUL].BOLD}" 
-			printf " %${PAGEWIDTH}s " ""
-			printf "%s" "${BOX[CUR].BOLD}"
-			printf "\n"
-		)|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+    if [[ "${MESSAGE}" == BOX_TOP ]]; then
+		MESSAGE="${BOX[CUL].BOLD}${BAR_HR}${BOX[CUR].BOLD}"
 	elif [[ "${MESSAGE}" == BOX_MIDDLE ]]; then
-		(
-			printf "%s" "${BOX[CVR].BOLD}" 
-			printf " %${PAGEWIDTH}s " ""
-			printf "%s" "${BOX[CVL].BOLD}"
-			printf "\n"
-		)|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+		MESSAGE="${BOX[CVR].BOLD}${BAR_HR}${BOX[CVL].BOLD}"
 	elif [[ "${MESSAGE}" == BOX_BOTTOM ]]; then
-		(
-            printf "%s" "${BOX[CLL].BOLD}" 
-            printf " %${PAGEWIDTH}s " ""
-            printf "%s" "${BOX[CLR].BOLD}"
-            printf "\n"
-        )|sed "s/ /${BOX[BMM].BOLD}/g"|read -r MESSAGE
+		MESSAGE="${BOX[CLL].BOLD}${BAR_HR}${BOX[CLR].BOLD}"
 	else
-		(
+        (
             printf "%s" "${BOX[BVV].BOLD}"
             printf " %-${PAGEWIDTH}s " "${MESSAGE}"
             printf "%s" "${BOX[BVV].BOLD}"
-        )|read -r MESSAGE
+        ) | read -r MESSAGE
     fi
 
 	if [[ "${OUTPUTFILE}" ]]; then
@@ -241,6 +265,8 @@ typeset TRACEFILE=/tmp/trace.${SCRIPTNAME}.$(date +%Y%m%d-%H%M%S).out
 typeset MYIP=$(ifconfig -a|awk '/inet / {print $2;exit}')
 typeset -i SLEEP=10
 typeset -i BUSYTHRESHOLD=20
+# Default to use the pretty boxes.
+typeset -u BOXES="ENABLED"
 # We'll actually dynamically change the 'busy' threshold later by looking at the
 #  average/median percentage used of all of our processes, we can get a better 
 #  idea of whats busy and what is 'normal'.
@@ -250,19 +276,24 @@ typeset -i BUSYONLY=0
 
 #=Usage=========================================================================
 USAGE="[+NAME?${SCRIPTNAME} --- Show AIX LPAR Network Traffic Information]"
-USAGE+="[+DESCRIPTION? This script will show the network activity of an LPAR .]"
+USAGE+="[+DESCRIPTION? This script will show the network activity of an LPAR.]"
 USAGE+="[-author?David Little <david.n.little@gmail.com>]"
 USAGE+="[-copyright?Free to use and modify - Use at own risk.]"
 USAGE+="[-license?${LICENSE}]"
 
-USAGE+="[b:busy-only?Display only busy IP addresses. Disabled by default.]"
+USAGE+="[b:busy-only?Display only busy IP addresses.]"
+USAGE+="[B:no-boxes?Do not display 'box' grid in output.]"
 USAGE+="[t:trace?Location to store tcpdump file]:[TRACEFILE:=${TRACEFILE}]"
 USAGE+="[o:outputdir?Directory to redirect the report itself.]:[OUTPUTFILE:=${OUTPUTFILE}]"
 USAGE+="[s:sleep?Length in seconds to measure network traffic.]#[SLEEP:=${SLEEP}]"
+USAGE+="[S:simple-boxes?Use simple box ASCII.]"
 USAGE+=$'\n\n'
+
 while getopts "$USAGE" optchar ; do
     case $optchar in
 		b)  BUSYONLY=1 ;;
+		B)  BOXES="DISABLED" ;;
+        S)  BOXES="SIMPLE" ;;
 		f)  TRACEFILE=$OPTARG ;;
         o)  OUTPUTDIR=$OPTARG ;;
 		s)  SLEEP=$OPTARG ;;
@@ -472,16 +503,18 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
 			#Mark this one as Busy
 			BUSYIP[${REMOTEIP}:${REMOTEPORT}]=${IN_COUNTPERC},${OUT_COUNTPERC}
 			BUSY=1 # Set busy flag
+		else
+			BUSY=0
 		fi
 		if (( BUSY==1 || BUSYONLY==0 )); then
 			{
-                printf " %-10s ${BOX[BVV].NORM}"		"${DIRECTION}"
-                printf " :%-5s ${BOX[BVV].NORM}"		"${LOCALPORT}"
-                printf " %15s:%-5s ${BOX[BVV].NORM}"	"${REMOTEIP}" "${REMOTEPORT}"
-                printf " %7i ${BOX[BVV].NORM}"			"${IN_COUNT}"
-                printf " %6.2f ${BOX[BVV].NORM}" 		"${IN_COUNTPERC}"
-                printf " %7i ${BOX[BVV].NORM}"			"${OUT_COUNT}"
-                printf " %6.2f ${BOX[BVV].NORM}" 		"${OUT_COUNTPERC}"
+                printf " %-10s ${BOX[BVV].NORM}"	  "${DIRECTION}"
+                printf " :%-5s ${BOX[BVV].NORM}"	  "${LOCALPORT}"
+                printf " %15s:%-5s ${BOX[BVV].NORM}"  "${REMOTEIP}" "${REMOTEPORT}"
+                printf " %7i ${BOX[BVV].NORM}"		  "${IN_COUNT}"
+                printf " %6.2f ${BOX[BVV].NORM}" 	  "${IN_COUNTPERC}"
+                printf " %7i ${BOX[BVV].NORM}"		  "${OUT_COUNT}"
+                printf " %6.2f ${BOX[BVV].NORM}" 	  "${OUT_COUNTPERC}"
                 OUTBARLEN=$((OUT_COUNTPERC/10))
                 INBARLEN=$((IN_COUNTPERC/10))
                 OUTBAR=$(printf %${OUTBARLEN}s|sed 's/ /</g')
@@ -493,7 +526,6 @@ for INDEX in ${!ARRAY_OUTGOINGTRAFFIC[*]} ${!ARRAY_INCOMINGTRAFFIC[*]}; do
                     printf "----"
                 fi
                 # printf "%4s" "$( (( BUSY == 1 )) && echo "Busy" || echo " " )" # (( BUSY ? "BUSY" : "" )) might work ?
-                BUSY=0 # Unset busy flag
             } | read -r _msg
             MSG "${_msg}"
 		fi
